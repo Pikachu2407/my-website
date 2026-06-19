@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HIKARI All-in-One Calculator</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #ff9f0a;
+            --text-color: #ffffff;
+            --btn-bg: #333333;
+            --btn-active: #444444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .calc-container {
+            width: 100%;
+            max-width: 400px;
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        /* Tabs Styling */
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            scrollbar-width: none; /* Hide scrollbar Firefox */
+        }
+        .tabs::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome */
+
+        .tab-btn {
+            background-color: var(--btn-bg);
+            color: #bbb;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent-color);
+            color: #000;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Standard Screen */
+        .screen {
+            width: 100%;
+            height: 80px;
+            background: #000;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            text-align: right;
+            padding: 10px;
+            font-size: 2rem;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+
+        /* Grid Layout for Buttons */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button.calc-btn {
+            background-color: var(--btn-bg);
+            color: #fff;
+            border: none;
+            padding: 20px 10px;
+            font-size: 1.2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        button.calc-btn:active { background-color: var(--btn-active); }
+        button.operator { color: var(--accent-color); font-weight: bold; }
+        button.equal { background-color: var(--accent-color); color: #000; font-weight: bold; }
+        button.equal:active { background-color: #cc8008; }
+        button.clear { color: #ff453a; }
+
+        /* Form Controls for Tools */
+        .tool-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tool-form label { font-size: 14px; color: #aaa; }
+        .tool-form input, .tool-form select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background-color: #000;
+            color: #fff;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .tool-btn {
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .result-box {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #000;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+        .result-box p { margin: 5px 0; font-size: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="calc-container">
+    <!-- Top Tabs Menu -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('standard')">Standard</button>
+        <button class="tab-btn" onclick="openTab('scientific')">Scientific</button>
+        <button class="tab-btn" onclick="openTab('age')">Age</button>
+        <button class="tab-btn" onclick="openTab('gst')">GST</button>
+        <button class="tab-btn" onclick="openTab('unit')">Converter</button>
+    </div>
+
+    <!-- 1. STANDARD CALCULATOR -->
+    <div id="standard" class="tab-content active">
+        <input type="text" class="screen" id="std-screen" readonly value="0">
+        <div class="grid">
+            <button class="calc-btn clear" onclick="clearStd()">C</button>
+            <button class="calc-btn operator" onclick="pressStd('%')">%</button>
+            <button class="calc-btn operator" onclick="backspaceStd()">⌫</button>
+            <button class="calc-btn operator" onclick="pressStd('/')">÷</button>
+
+            <button class="calc-btn" onclick="pressStd('7')">7</button>
+            <button class="calc-btn" onclick="pressStd('8')">8</button>
+            <button class="calc-btn" onclick="pressStd('9')">9</button>
+            <button class="calc-btn operator" onclick="pressStd('*')">×</button>
+
+            <button class="calc-btn" onclick="pressStd('4')">4</button>
+            <button class="calc-btn" onclick="pressStd('5')">5</button>
+            <button class="calc-btn" onclick="pressStd('6')">6</button>
+            <button class="calc-btn operator" onclick="pressStd('-')">-</button>
+
+            <button class="calc-btn" onclick="pressStd('1')">1</button>
+            <button class="calc-btn" onclick="pressStd('2')">2</button>
+            <button class="calc-btn" onclick="pressStd('3')">3</button>
+            <button class="calc-btn operator" onclick="pressStd('+')">+</button>
+
+            <button class="calc-btn" onclick="pressStd('00')">00</button>
+            <button class="calc-btn" onclick="pressStd('0')">0</button>
+            <button class="calc-btn" onclick="pressStd('.')">.</button>
+            <button class="calc-btn equal" onclick="calculateStd()">=</button>
+        </div>
+    </div>
+
+    <!-- 2. SCIENTIFIC CALCULATOR -->
+    <div id="scientific" class="tab-content">
+        <input type="text" class="screen" id="sci-screen" readonly value="0">
+        <div class="grid" style="grid-template-columns: repeat(4, 1fr);">
+            <button class="calc-btn operator" onclick="sciFunc('sin')">sin</button>
+            <button class="calc-btn operator" onclick="sciFunc('cos')">cos</button>
+            <button class="calc-btn operator" onclick="sciFunc('tan')">tan</button>
+            <button class="calc-btn clear" onclick="clearSci()">C</button>
+
+            <button class="calc-btn operator" onclick="sciFunc('sqrt')">√</button>
+            <button class="calc-btn operator" onclick="sciFunc('pow2')">x²</button>
+            <button class="calc-btn operator" onclick="sciFunc('log')">log</button>
+            <button class="calc-btn operator" onclick="pressSci('/')">÷</button>
+
+            <button class="calc-btn" onclick="pressSci('7')">7</button>
+            <button class="calc-btn" onclick="pressSci('8')">8</button>
+            <button class="calc-btn" onclick="pressSci('9')">9</button>
+            <button class="calc-btn operator" onclick="pressSci('*')">×</button>
+
+            <button class="calc-btn" onclick="pressSci('4')">4</button>
+            <button class="calc-btn" onclick="pressSci('5')">5</button>
+            <button class="calc-btn" onclick="pressSci('6')">6</button>
+            <button class="calc-btn operator" onclick="pressSci('-')">-</button>
+
+            <button class="calc-btn" onclick="pressSci('1')">1</button>
+            <button class="calc-btn" onclick="pressSci('2')">2</button>
+            <button class="calc-btn" onclick="pressSci('3')">3</button>
+            <button class="calc-btn operator" onclick="pressSci('+')">+</button>
+
+            <button class="calc-btn operator" onclick="sciFunc('pi')">π</button>
+            <button class="calc-btn" onclick="pressSci('0')">0</button>
+            <button class="calc-btn" onclick="pressSci('.')">.</button>
+            <button class="calc-btn equal" onclick="calculateSci()">=</button>
+        </div>
+    </div>
+
+    <!-- 3. AGE CALCULATOR -->
+    <div id="age" class="tab-content">
+        <div class="tool-form">
+            <div>
+                <label>Date of Birth (जन्मतिथि):</label>
+                <input type="date" id="dob">
+            </div>
+            <div>
+                <label>Current Date (आज की तारीख):</label>
+                <input type="date" id="current-date">
+            </div>
+            <button class="tool-btn" onclick="calculateAge()">Calculate Age</button>
+        </div>
+        <div class="result-box" id="age-result" style="display:none;"></div>
+    </div>
+
+    <!-- 4. GST CALCULATOR -->
+    <div id="gst" class="tab-content">
+        <div class="tool-form">
+            <div>
+                <label>Total Amount (राशि):</label>
+                <input type="number" id="gst-amount" placeholder="e.g. 1000">
+            </div>
+            <div>
+                <label>GST Rate (%):</label>
+                <select id="gst-rate">
+                    <option value="5">5%</option>
+                    <option value="12">12%</option>
+                    <option value="18" selected>18%</option>
+                    <option value="28">28%</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="tool-btn" style="flex:1;" onclick="calculateGST(true)">+ Add GST</button>
+                <button class="tool-btn" style="flex:1; background-color:#ff453a; color:#fff;" onclick="calculateGST(false)">- Remove GST</button>
+            </div>
+        </div>
+        <div class="result-box" id="gst-result" style="display:none;"></div>
+    </div>
+
+    <!-- 5. UNIT CONVERTER -->
+    <div id="unit" class="tab-content">
+        <div class="tool-form">
+            <div>
+                <label>Value (संख्या):</label>
+                <input type="number" id="unit-value" value="1">
+            </div>
+            <div>
+                <label>From (यहाँ से):</label>
+                <select id="unit-from">
+                    <option value="km">Kilometer (km)</option>
+                    <option value="m" selected>Meter (m)</option>
+                    <option value="cm">Centimeter (cm)</option>
+                    <option value="kg">Kilogram (kg)</option>
+                    <option value="g">Gram (g)</option>
+                </select>
+            </div>
+            <div>
+                <label>To (यहाँ तक):</label>
+                <select id="unit-to">
+                    <option value="km">Kilometer (km)</option>
+                    <option value="m">Meter (m)</option>
+                    <option value="cm" selected>Centimeter (cm)</option>
+                    <option value="kg">Kilogram (kg)</option>
+                    <option value="g">Gram (g)</option>
+                </select>
+            </div>
+            <button class="tool-btn" onclick="convertUnits()">Convert</button>
+        </div>
+        <div class="result-box" id="unit-result" style="display:none;"></div>
+    </div>
+</div>
+
+<script>
+    // --- Tab Switching Logic ---
+    function openTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // Set today's date in Age Calculator by default
+    document.getElementById('current-date').valueAsDate = new Date();
+
+    // --- 1. Standard Calculator Logic ---
+    let stdScreen = document.getElementById('std-screen');
+    function pressStd(val) {
+        if(stdScreen.value === "0" && val !== '.') stdScreen.value = "";
+        stdScreen.value += val;
+    }
+    function clearStd() { stdScreen.value = "0"; }
+    function backspaceStd() {
+        stdScreen.value = stdScreen.value.slice(0, -1);
+        if(stdScreen.value === "") stdScreen.value = "0";
+    }
+    function calculateStd() {
+        try {
+            stdScreen.value = eval(stdScreen.value);
+        } catch(e) {
+            stdScreen.value = "Error";
+        }
+    }
+
+    // --- 2. Scientific Calculator Logic ---
+    let sciScreen = document.getElementById('sci-screen');
+    function pressSci(val) {
+        if(sciScreen.value === "0" && val !== '.') sciScreen.value = "";
+        sciScreen.value += val;
+    }
+    function clearSci() { sciScreen.value = "0"; }
+    function calculateSci() {
+        try {
+            sciScreen.value = eval(sciScreen.value);
+        } catch(e) {
+            sciScreen.value = "Error";
+        }
+    }
+    function sciFunc(type) {
+        let val = parseFloat(sciScreen.value);
+        if(isNaN(val)) return;
+        if(type === 'sin') sciScreen.value = Math.sin(val * Math.PI / 180).toFixed(6);
+        if(type === 'cos') sciScreen.value = Math.cos(val * Math.PI / 180).toFixed(6);
+        if(type === 'tan') sciScreen.value = Math.tan(val * Math.PI / 180).toFixed(6);
+        if(type === 'sqrt') sciScreen.value = Math.sqrt(val);
+        if(type === 'pow2') sciScreen.value = Math.pow(val, 2);
+        if(type === 'log') sciScreen.value = Math.log10(val).toFixed(6);
+        if(type === 'pi') sciScreen.value = Math.PI.toFixed(6);
+    }
+
+    // --- 3. Age Calculator Logic ---
+    function calculateAge() {
+        let dobInput = document.getElementById('dob').value;
+        let currInput = document.getElementById('current-date').value;
+        if(!dobInput) return alert("कृपया जन्मतिथि चुनें!");
+
+        let dob = new Date(dobInput);
+        let curr = new Date(currInput);
+
+        let diff = curr - dob;
+        if (diff < 0) return alert("जन्मतिथि आज की तारीख से आगे नहीं हो सकती!");
+
+        let years = curr.getFullYear() - dob.getFullYear();
+        let months = curr.getMonth() - dob.getMonth();
+        let days = curr.getDate() - dob.getDate();
+
+        if (days < 0) {
+            months--;
+            days += new Date(curr.getFullYear(), curr.getMonth(), 0).getDate();
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        let resBox = document.getElementById('age-result');
+        resBox.style.display = "block";
+        resBox.innerHTML = `<p><b>उम्र:</b> ${years} साल, ${months} महीने, ${days} दिन</p>`;
+    }
+
+    // --- 4. GST Calculator Logic ---
+    function calculateGST(isAdd) {
+        let amount = parseFloat(document.getElementById('gst-amount').value);
+        let rate = parseFloat(document.getElementById('gst-rate').value);
+        if(isNaN(amount)) return alert("कृपया राशि दर्ज करें!");
+
+        let gst, total;
+        if(isAdd) {
+            gst = (amount * rate) / 100;
+            total = amount + gst;
+            document.getElementById('gst-result').innerHTML = `
+                <p>मूल राशि (Net): ₹${amount.toFixed(2)}</p>
+                <p>GST (${rate}%): +₹${gst.toFixed(2)}</p>
+                <p><b>कुल राशि (Total): ₹${total.toFixed(2)}</b></p>
+            `;
+        } else {
+            total = amount;
+            let originalAmount = total / (1 + (rate/100));
+            gst = total - originalAmount;
+            document.getElementById('gst-result').innerHTML = `
+                <p>कुल राशि (Total): ₹${total.toFixed(2)}</p>
+                <p>GST (${rate}% Included): -₹${gst.toFixed(2)}</p>
+                <p><b>मूल राशि (Without GST): ₹${originalAmount.toFixed(2)}</b></p>
+            `;
+        }
+        document.getElementById('gst-result').style.display = "block";
+    }
+
+    // --- 5. Unit Converter Logic ---
+    function convertUnits() {
+        let val = parseFloat(document.getElementById('unit-value').value);
+        let from = document.getElementById('unit-from').value;
+        let to = document.getElementById('unit-to').value;
+        if(isNaN(val)) return;
+
+        // Conversion logic relative to meter (m) and gram (g)
+        let baseValue = val;
+        
+        // Convert to Base
+        if(from === 'km') baseValue = val * 1000;
+        if(from === 'cm') baseValue = val / 100;
+        if(from === 'kg') baseValue = val * 1000;
+
+        // Incompatible Type Check (Weight vs Length)
+        let isLength = ['km', 'm', 'cm'].includes(from) && ['km', 'm', 'cm'].includes(to);
+        let isWeight = ['kg', 'g'].includes(from) && ['kg', 'g'].includes(to);
+
+        if(!isLength && !isWeight) {
+            return alert("कृपया समान यूनिट्स चुनें (जैसे लंबाई से लंबाई, वजन से वजन)!");
+        }
+
+        // Convert from Base to Target
+        let finalVal = baseValue;
+        if(to === 'km') finalVal = baseValue / 1000;
+        if(to === 'cm') finalVal = baseValue * 100;
+        if(to === 'kg') finalVal = baseValue / 1000;
+
+        let resBox = document.getElementById('unit-result');
+        resBox.style.display = "block";
+        resBox.innerHTML = `<p><b>नतीजा:</b> ${val} ${from} = ${finalVal.toFixed(4)} ${to}</p>`;
+    }
+</script>
+
+</body>
+</html>
